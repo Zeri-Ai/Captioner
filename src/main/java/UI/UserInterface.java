@@ -5,7 +5,10 @@
  */
 package UI;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -37,6 +40,16 @@ public class UserInterface {
 
         public void setImage(BufferedImage bf) {
             this.bf = bf;
+        }
+        
+        @Override
+        protected void paintComponent(Graphics grphcs){
+            Graphics2D g = (Graphics2D) grphcs;
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, getWidth(), getHeight());
+            int wid = bf.getWidth();
+            int hei = bf.getHeight();
+            g.drawImage(bf, 0, 0, wid, hei, null);
         }
 
         public Canvas() {
