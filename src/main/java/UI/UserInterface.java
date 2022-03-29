@@ -11,9 +11,16 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -22,13 +29,20 @@ import javax.swing.JPanel;
 public class UserInterface {
 
     public static final Dimension DEFAULT_DIMENSIONS;
-    public static final Dimension CANVAS_DEFAULT_DIMENSIONS;
+    public static final double CANVAS_HEIGHT_PROPORTION;
+    public static final double IMAGE_HEIGHT_PROPORTION;
+    public static final double TEXT_HEIGHT_PROPORTION;
     private final JFrame frame;
     private final Canvas canvas;
+    private final JPanel input;
+    private final JTextField textfield;
+    private final JButton button;
 
     static {
         DEFAULT_DIMENSIONS = new Dimension(800, 600);
-        CANVAS_DEFAULT_DIMENSIONS = new Dimension(DEFAULT_DIMENSIONS.width, DEFAULT_DIMENSIONS.height / 6 * 5);
+        CANVAS_HEIGHT_PROPORTION = 5d / 6d;
+        IMAGE_HEIGHT_PROPORTION = 7d / 8d;
+        TEXT_HEIGHT_PROPORTION = 1d / 8d;
     }
 
     private class Canvas extends JPanel {
@@ -57,16 +71,16 @@ public class UserInterface {
             g.setColor(Color.BLACK);
             g.fillRect(0, 0, wid, hei);
             if (bf != null) {
-                g.drawImage(bf, 0, 0, wid, hei * 7 / 8, null);
+                g.drawImage(bf, 0, 0, wid, (int) (hei * IMAGE_HEIGHT_PROPORTION), null);
             }
             if (text != null && !text.isBlank()) {
                 g.setColor(Color.WHITE);
-                FontMetrics fm = g.getFontMetrics();
                 g.setFont(g.getFont().deriveFont(32.0f));
+                FontMetrics fm = g.getFontMetrics();
                 int textWidth = fm.stringWidth(text);
                 int textHeight = fm.getMaxAscent() + fm.getMaxDescent();
                 int textX = (wid-textWidth)/2;
-                int textY = (hei*7/8) + (hei/16) + (textHeight/2);
+                int textY = ((int) (hei * IMAGE_HEIGHT_PROPORTION)) + ((int) (hei * TEXT_HEIGHT_PROPORTION / 2)) + (textHeight / 2);
                 g.drawString(text, textX, textY);
             }
         }
@@ -82,10 +96,12 @@ public class UserInterface {
 
     public void setImage(BufferedImage bf) {
         canvas.setImage(bf);
+        canvas.repaint();
     }
 
     public void setText(String text) {
         canvas.setText(text == null ? "" : text);
+        canvas.repaint();
     }
 
     public UserInterface() {
@@ -93,10 +109,43 @@ public class UserInterface {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         canvas = new Canvas();
         JPanel contentPane = new JPanel(new BorderLayout());
+        input = new JPanel(new BorderLayout());
+        textfield = new JTextField();
+        input.add(textfield, BorderLayout.CENTER);
+        textfield.addKeyListener(new KeyListener(){
+            @Override
+            public void keyTyped(KeyEvent e) {
+                StringBuilder sb = new StringBuilder(textfield.getText());
+                sb.append(e.getKeyChar());
+                setText(sb.toString());
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+            }
+        });
+        button = new JButton("Guardar");
+        input.add(button, BorderLayout.AFTER_LINE_ENDS);
+        button.addActionListener((ActionEvent ae) -> {
+            if (canvas.bf != null && canvas.text != null && !canvas.text.isBlank()) {
+                Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text);
+            }
+        });
+        contentPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                Dimension cp_dim = contentPane.getSize();
+                canvas.setPreferredSize(new Dimension(cp_dim.width, (int) (cp_dim.height * CANVAS_HEIGHT_PROPORTION)));
+            }
+        });
         contentPane.setPreferredSize(DEFAULT_DIMENSIONS);
         frame.setContentPane(contentPane);
-        canvas.setPreferredSize(CANVAS_DEFAULT_DIMENSIONS);
         contentPane.add(canvas, BorderLayout.CENTER);
+        contentPane.add(input, BorderLayout.PAGE_END);
         frame.setVisible(true);
         frame.pack();
         frame.setLocationRelativeTo(null);
