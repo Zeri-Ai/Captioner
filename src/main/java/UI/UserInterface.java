@@ -17,6 +17,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -82,6 +85,7 @@ public class UserInterface {
                 int textX = (wid-textWidth)/2;
                 int textY = ((int) (hei * IMAGE_HEIGHT_PROPORTION)) + ((int) (hei * TEXT_HEIGHT_PROPORTION / 2)) + (textHeight / 2);
                 g.drawString(text, textX, textY);
+                g.dispose();
             }
         }
 
@@ -132,7 +136,11 @@ public class UserInterface {
         input.add(button, BorderLayout.AFTER_LINE_ENDS);
         button.addActionListener((ActionEvent ae) -> {
             if (canvas.bf != null && canvas.text != null && !canvas.text.isBlank()) {
-                Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text);
+                try {
+                    Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, "Testxd.png");
+                } catch (IOException ex) {
+                    Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
         contentPane.addComponentListener(new ComponentAdapter() {
