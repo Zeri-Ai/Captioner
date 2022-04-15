@@ -6,6 +6,7 @@
 package Utilities;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -21,9 +22,11 @@ import javax.imageio.ImageIO;
 public abstract class Utilities {
 
     public static final double HEIGHT_PROPORTION;
+    public static final Font DEFAULT_FONT;
 
     static {
         HEIGHT_PROPORTION = 1.1d;
+        DEFAULT_FONT = new Font("Yu Mincho Demibold", Font.PLAIN, 10);
     }
 
     public static final void CaptionAndSavePicture(BufferedImage picture, String text, String filename) throws IOException {
@@ -33,6 +36,7 @@ public abstract class Utilities {
         BufferedImage result = new BufferedImage(width, (int) (old_height * HEIGHT_PROPORTION), BufferedImage.TYPE_4BYTE_ABGR);
         int height = result.getHeight();
         Graphics2D g = result.createGraphics();
+        g.setFont(DEFAULT_FONT);
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, width, height);
         g.drawImage(picture, 0, 0, null);
@@ -43,7 +47,7 @@ public abstract class Utilities {
             while (!is_capped) {
                 g.setFont(g.getFont().deriveFont(font_size));
                 FontMetrics fm = g.getFontMetrics();
-                int text_height = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
+                int text_height = fm.getMaxAscent() + fm.getMaxDescent();
                 if (text_height >= text_height_cap || fm.stringWidth(text) >= width) {
                     g.setFont(g.getFont().deriveFont(font_size - 0.1f));
                     is_capped = true;
@@ -52,14 +56,10 @@ public abstract class Utilities {
                 }
             }
         }
-        g.setColor(Color.BLUE);
         FontMetrics fm = g.getFontMetrics();
-        Rectangle2D r = fm.getStringBounds(text, g);
-        System.out.println(r);
-        g.fillRect(width/2, 0, (int)r.getWidth(), (int)r.getHeight());
         int fontSize = fm.getAscent() + fm.getDescent();
         int x = (width - fm.stringWidth(text)) / 2;
-        int y = /*old_height + ((height - old_height) / 2)*/ + (fontSize);
+        int y = old_height + ((height - old_height) / 2) + (fontSize/2);
         g.setColor(Color.WHITE);
         g.drawString(text, x, y);
         ImageIO.write(result, "png", outputFile);

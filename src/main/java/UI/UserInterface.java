@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -40,6 +41,7 @@ public class UserInterface {
     private final JPanel input;
     private final JTextField textfield;
     private final JButton button;
+    private final JFileChooser filechooser;
 
     static {
         DEFAULT_DIMENSIONS = new Dimension(800, 600);
@@ -69,6 +71,7 @@ public class UserInterface {
         @Override
         protected void paintComponent(Graphics grphcs) {
             Graphics2D g = (Graphics2D) grphcs;
+            g.setFont(Utilities.Utilities.DEFAULT_FONT);
             int wid = getWidth();
             int hei = getHeight();
             g.setColor(Color.BLACK);
@@ -82,7 +85,7 @@ public class UserInterface {
                 FontMetrics fm = g.getFontMetrics();
                 int textWidth = fm.stringWidth(text);
                 int textHeight = fm.getMaxAscent() + fm.getMaxDescent();
-                int textX = (wid-textWidth)/2;
+                int textX = (wid - textWidth) / 2;
                 int textY = ((int) (hei * IMAGE_HEIGHT_PROPORTION)) + ((int) (hei * TEXT_HEIGHT_PROPORTION / 2)) + (textHeight / 2);
                 g.drawString(text, textX, textY);
                 g.dispose();
@@ -116,7 +119,7 @@ public class UserInterface {
         input = new JPanel(new BorderLayout());
         textfield = new JTextField();
         input.add(textfield, BorderLayout.CENTER);
-        textfield.addKeyListener(new KeyListener(){
+        textfield.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 StringBuilder sb = new StringBuilder(textfield.getText());
@@ -135,12 +138,17 @@ public class UserInterface {
         button = new JButton("Guardar");
         input.add(button, BorderLayout.AFTER_LINE_ENDS);
         button.addActionListener((ActionEvent ae) -> {
+            button.setEnabled(false);
             if (canvas.bf != null && canvas.text != null && !canvas.text.isBlank()) {
-                try {
-                    Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, "Testxd.png");
-                } catch (IOException ex) {
-                    Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
-                }
+                new Thread(() -> {
+                    try {
+                        Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, "Testxd.png");
+                    } catch (IOException ex) {
+                        Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        button.setEnabled(true);
+                    }
+                }).start();
             }
         });
         contentPane.addComponentListener(new ComponentAdapter() {

@@ -6,6 +6,7 @@
 package Main;
 
 import UI.UserInterface;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +25,12 @@ public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
+                String fonts[]
+                        = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+                for (int i = 0; i < fonts.length; i++) {
+                    System.out.println(fonts[i]);
+                }
                 UserInterface ui = new UserInterface();
                 File image = new File("src/main/java/Test/Test.png");
                 System.out.println(image.getCanonicalPath());
