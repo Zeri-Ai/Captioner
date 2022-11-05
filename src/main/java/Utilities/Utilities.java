@@ -26,7 +26,7 @@ public abstract class Utilities {
 
     static {
         HEIGHT_PROPORTION = 1.1d;
-        DEFAULT_FONT = new Font("Yu Mincho Demibold", Font.PLAIN, 10);
+        DEFAULT_FONT = new Font("Impact", Font.PLAIN, 10);
     }
 
     public static final void CaptionAndSavePicture(BufferedImage picture, String text, String filename) throws IOException {
@@ -41,13 +41,17 @@ public abstract class Utilities {
         g.fillRect(0, 0, width, height);
         g.drawImage(picture, 0, 0, null);
         {
-            int text_height_cap = height - old_height;
+            int text_height_cap = height - old_height - 7;
+            if (text_height_cap < 0)
+            {
+                return;
+            }
             float font_size = 1.0f;
             boolean is_capped = false;
             while (!is_capped) {
                 g.setFont(g.getFont().deriveFont(font_size));
                 FontMetrics fm = g.getFontMetrics();
-                int text_height = fm.getMaxAscent() + fm.getMaxDescent();
+                int text_height = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
                 if (text_height >= text_height_cap || fm.stringWidth(text) >= width) {
                     g.setFont(g.getFont().deriveFont(font_size - 0.1f));
                     is_capped = true;
@@ -57,9 +61,9 @@ public abstract class Utilities {
             }
         }
         FontMetrics fm = g.getFontMetrics();
-        int fontSize = fm.getAscent() + fm.getDescent();
+        int fontSize = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
         int x = (width - fm.stringWidth(text)) / 2;
-        int y = old_height + ((height - old_height) / 2) + (fontSize/2);
+        int y = old_height + ((height - old_height) / 2) + (fontSize/2) - fm.getDescent();
         g.setColor(Color.WHITE);
         g.drawString(text, x, y);
         ImageIO.write(result, "png", outputFile);

@@ -84,9 +84,9 @@ public class UserInterface {
                 g.setFont(g.getFont().deriveFont(32.0f));
                 FontMetrics fm = g.getFontMetrics();
                 int textWidth = fm.stringWidth(text);
-                int textHeight = fm.getMaxAscent() + fm.getMaxDescent();
+                int textHeight = fm.getMaxAscent() + fm.getMaxDescent() + fm.getLeading();
                 int textX = (wid - textWidth) / 2;
-                int textY = ((int) (hei * IMAGE_HEIGHT_PROPORTION)) + ((int) (hei * TEXT_HEIGHT_PROPORTION / 2)) + (textHeight / 2);
+                int textY = ((int) (hei * IMAGE_HEIGHT_PROPORTION)) + ((int) (hei * TEXT_HEIGHT_PROPORTION / 2)) + (textHeight / 2) - fm.getDescent();
                 g.drawString(text, textX, textY);
                 g.dispose();
             }
@@ -122,9 +122,12 @@ public class UserInterface {
         textfield.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
+                /*
                 StringBuilder sb = new StringBuilder(textfield.getText());
                 sb.append(e.getKeyChar());
                 setText(sb.toString());
+                */
+                //setText(textfield.getText());
             }
 
             @Override
@@ -133,6 +136,7 @@ public class UserInterface {
 
             @Override
             public void keyReleased(KeyEvent e) {
+                setText(textfield.getText());
             }
         });
         button = new JButton("Guardar");
@@ -162,6 +166,7 @@ public class UserInterface {
         frame.setContentPane(contentPane);
         contentPane.add(canvas, BorderLayout.CENTER);
         contentPane.add(input, BorderLayout.PAGE_END);
+        filechooser = new JFileChooser();
         frame.setVisible(true);
         frame.pack();
         frame.setLocationRelativeTo(null);
