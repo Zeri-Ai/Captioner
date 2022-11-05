@@ -162,6 +162,12 @@ public class UserInterface {
                         if (selection != JFileChooser.APPROVE_OPTION){
                             return;
                         }
+                        if (filechooser.getSelectedFile().exists()){
+                            selection = JOptionPane.showConfirmDialog(frame, "El archivo ya existe, sobreescribir?", "Archivo existente", JOptionPane.YES_NO_OPTION);
+                            if (selection != JOptionPane.YES_OPTION){
+                                return;
+                            }
+                        }
                         Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, filechooser.getSelectedFile().getAbsolutePath());
                         JOptionPane.showMessageDialog(frame, "Guardado!");
                     } catch (IOException ex) {
