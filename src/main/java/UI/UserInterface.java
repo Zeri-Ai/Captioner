@@ -17,12 +17,15 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -40,7 +43,8 @@ public class UserInterface {
     private final Canvas canvas;
     private final JPanel input;
     private final JTextField textfield;
-    private final JButton button;
+    private final JButton saveButton;
+    private final JButton openButton;
     private final JFileChooser filechooser;
 
     static {
@@ -62,10 +66,12 @@ public class UserInterface {
 
         public void setImage(BufferedImage bf) {
             this.bf = bf;
+            this.repaint();
         }
 
         public void setText(String text) {
             this.text = text;
+            this.repaint();
         }
 
         @Override
@@ -103,12 +109,10 @@ public class UserInterface {
 
     public void setImage(BufferedImage bf) {
         canvas.setImage(bf);
-        canvas.repaint();
     }
 
     public void setText(String text) {
         canvas.setText(text == null ? "" : text);
-        canvas.repaint();
     }
 
     public UserInterface() {
@@ -122,12 +126,6 @@ public class UserInterface {
         textfield.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                /*
-                StringBuilder sb = new StringBuilder(textfield.getText());
-                sb.append(e.getKeyChar());
-                setText(sb.toString());
-                */
-                //setText(textfield.getText());
             }
 
             @Override
@@ -139,18 +137,38 @@ public class UserInterface {
                 setText(textfield.getText());
             }
         });
-        button = new JButton("Guardar");
-        input.add(button, BorderLayout.AFTER_LINE_ENDS);
-        button.addActionListener((ActionEvent ae) -> {
-            button.setEnabled(false);
+        saveButton = new JButton("Guardar");
+        input.add(saveButton, BorderLayout.AFTER_LINE_ENDS);
+        openButton = new JButton("Abrir");
+        filechooser = new JFileChooser(new File(System.getProperty("user.dir")));
+        input.add(openButton, BorderLayout.BEFORE_LINE_BEGINS);
+        openButton.addActionListener((ActionEvent ae) -> {
+            int selection = filechooser.showOpenDialog(frame);
+            if (selection != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+            try {
+                canvas.setImage(ImageIO.read(filechooser.getSelectedFile()));
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(canvas, "El archivo no es válido.");
+            }
+        });
+        saveButton.addActionListener((ActionEvent ae) -> {
+            saveButton.setEnabled(false);
             if (canvas.bf != null && canvas.text != null && !canvas.text.isBlank()) {
                 new Thread(() -> {
                     try {
-                        Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, "Testxd.png");
+                        int selection = filechooser.showSaveDialog(frame);
+                        if (selection != JFileChooser.APPROVE_OPTION){
+                            return;
+                        }
+                        Utilities.Utilities.CaptionAndSavePicture(canvas.bf, canvas.text, filechooser.getSelectedFile().getAbsolutePath());
+                        JOptionPane.showMessageDialog(frame, "Guardado!");
                     } catch (IOException ex) {
                         Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                        JOptionPane.showMessageDialog(frame, "Error al guardar.");
                     } finally {
-                        button.setEnabled(true);
+                        saveButton.setEnabled(true);
                     }
                 }).start();
             }
@@ -166,9 +184,9 @@ public class UserInterface {
         frame.setContentPane(contentPane);
         contentPane.add(canvas, BorderLayout.CENTER);
         contentPane.add(input, BorderLayout.PAGE_END);
-        filechooser = new JFileChooser();
-        frame.setVisible(true);
         frame.pack();
         frame.setLocationRelativeTo(null);
+        canvas.requestFocus();
+        frame.setVisible(true);
     }
 }

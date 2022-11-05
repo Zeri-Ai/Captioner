@@ -24,23 +24,7 @@ public class Main {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            try {
-                String fonts[]
-                        = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
-
-                for (int i = 0; i < fonts.length; i++) {
-                    System.out.println(fonts[i]);
-                }
-                UserInterface ui = new UserInterface();
-                File image = new File("src/main/java/Test/Test.png");
-                System.out.println(image.getCanonicalPath());
-                FileInputStream in = new FileInputStream(image);
-                BufferedImage bf = ImageIO.read(in);
-                ui.setImage(bf);
-                ui.setText("Seggs");
-            } catch (IOException ex) {
-                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            UserInterface ui = new UserInterface();
         });
     }
 }
